@@ -1,0 +1,44 @@
+== Выполнение запроса
+
+
+[plantuml,"GRest-сheck","png"]
+----------
+@startuml
+actor "Потребитель API" as Client
+
+    box "Сервис GRest" #LightBlue
+           participant "GRest Service" as GRest
+            database "Mappings"
+       end box
+
+participant "GraphQL Server" as GraphQL
+participant "API Gateway" as Gateway
+participant Microservices
+
+Client  -> GRest :Запрос
+activate GRest
+GRest --> Mappings: поиск маппинга
+Mappings --> GRest:
+
+alt маппинг задан
+    GRest --> GRest: заполненние шаблона GraphQL-запроса
+    GRest --> GraphQL: GraphQL запрос
+    GraphQL --> Microservices: выполнение запроса
+    Microservices --> GraphQL:
+    GraphQL --> GRest: результат выполнения запроса
+
+    alt преобразование ответа задано в маппинге
+        GRest --> GRest: преобразование ответа
+    end
+else маппинг не задан
+    GRest --> Gateway: исходный запрос
+    Gateway --> Microservices: выполнение запроса
+    Microservices --> Gateway:
+    Gateway --> GRest: выполнение запроса
+end
+
+GRest -> Client :Результат
+deactivate GRest
+
+@enduml
+----------
