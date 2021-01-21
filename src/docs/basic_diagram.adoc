@@ -1,0 +1,44 @@
+== Выполнение запроса
+
+
+[plantuml,"R2G-сheck","png"]
+----------
+@startuml
+actor "Потребитель API" as Client
+
+    box "Сервис R2G" #LightBlue
+           participant "R2G Service" as R2G
+            database "Mappings"
+       end box
+
+participant "GraphQL Server" as GraphQL
+participant "API Gateway" as Gateway
+participant Microservices
+
+Client  -> R2G :Запрос
+activate R2G
+R2G --> Mappings: поиск маппинга
+Mappings --> R2G:
+
+alt маппинг задан
+    R2G --> R2G: заполненние шаблона GraphQL-запроса
+    R2G --> GraphQL: GraphQL запрос
+    GraphQL --> Microservices: выполнение запроса
+    Microservices --> GraphQL:
+    GraphQL --> R2G: результат выполнения запроса
+
+    alt преобразование ответа задано в маппинге
+        R2G --> R2G: преобразование ответа
+    end
+else маппинг не задан
+    R2G --> Gateway: исходный запрос
+    Gateway --> Microservices: выполнение запроса
+    Microservices --> Gateway:
+    Gateway --> R2G: выполнение запроса
+end
+
+R2G -> Client :Результат
+deactivate R2G
+
+@enduml
+----------

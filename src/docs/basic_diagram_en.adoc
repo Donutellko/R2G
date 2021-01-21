@@ -1,0 +1,43 @@
+== Выполнение запроса
+
+[plantuml,"R2G-сheck","png"]
+----------
+@startuml
+actor "API Client" as Client
+
+    box "Rest to GraphQL Adapter Service" #LightBlue
+           participant "Adapter Service" as R2G
+            database "Mappings"
+       end box
+
+participant "GraphQL Server" as GraphQL
+participant "API Gateway" as Gateway
+participant Microservices
+
+Client  -> R2G :REST request
+activate R2G
+R2G --> Mappings: search for mapping
+Mappings --> R2G:
+
+alt has mapping
+    R2G --> R2G: prepare the GraphQL-query
+    R2G --> GraphQL: GraphQL request
+    GraphQL --> Microservices: request execution
+    Microservices --> GraphQL:
+    GraphQL --> R2G: GraphQL response
+
+    alt has transformation rule in mapping
+        R2G --> R2G: perform transformation
+    end
+else has no mapping
+    R2G --> Gateway: raw HTTP request
+    Gateway --> Microservices: request execution
+    Microservices --> Gateway:
+    Gateway --> R2G: raw HTTP response
+end
+
+R2G -> Client :Result
+deactivate R2G
+
+@enduml
+----------
