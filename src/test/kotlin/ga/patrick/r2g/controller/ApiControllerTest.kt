@@ -24,16 +24,17 @@ class ApiControllerTest {
     lateinit var service: RequestProcessService
 
     @Test
-    fun testGet() {
+    fun testEndpoint() {
         val uri = ""
+        val mockRequest = MockHttpServletRequest(HttpMethod.GET.name, uri)
 
-        whenever(service.processGet(any()))
+        whenever(service.processRequest(any()))
                 .thenReturn(someOkResponse)
 
-        val result = controller.get(MockHttpServletRequest(HttpMethod.GET.name, uri))
+        val result = controller.endpoint(mockRequest)
 
         Assertions.assertEquals(someOkResponse, result)
-        verify(service).processGet(uri)
+        verify(service).processRequest(mockRequest)
     }
 
     companion object {

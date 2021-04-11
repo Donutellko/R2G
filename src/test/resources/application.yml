@@ -1,0 +1,28 @@
+r2g:
+  default-endpoint: https://postman-echo.com/
+
+  endpoints:
+    - name: fake-ql-accounts
+      uri: https://fakeql.com/graphql/cbc8a521a34c299f030c7f6df523591f
+
+    - name: fake-ql-accounts-fragile
+      uri: https://fakeql.com/fragilegraphql/cbc8a521a34c299f030c7f6df523591f
+      # The fragile API is a throttled endpoint that has random response delays between 0 and 1000 milliseconds and once in a while (1 in 10 chance) is completely unavailable (http error 503). This version of the API is perfect to test edge cases for when your future server is at its limits.
+
+  mappings:
+    - path: /users/${userId}/cards?currency=${currency}
+      method: GET
+      endpoint: fake-ql-accounts
+      template: |
+        {
+          users(ids: "${userId}") {
+            id
+            name
+            accounts(where: { currency_eq: "${currency}" }) {
+              id
+              amount
+              currency
+            }
+          }
+        }
+

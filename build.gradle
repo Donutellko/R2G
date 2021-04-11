@@ -6,7 +6,9 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
@@ -28,8 +30,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 group 'ga.patrick'
 version '1.0'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 12
+targetCompatibility = 12
 
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.springframework.boot'
@@ -40,6 +42,7 @@ apply plugin: 'kotlin-spring'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -49,6 +52,9 @@ dependencies {
 	implementation "org.jetbrains.kotlin:kotlin-reflect"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+    implementation "io.github.microutils:kotlin-logging:1.6.26"
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation "com.marcinziolo:kotlin-wiremock:1.0.0"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock:2.2.4.RELEASE'
 }

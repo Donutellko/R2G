@@ -1,0 +1,11 @@
+{
+  users (ids: "1"){
+    id
+    name
+    accounts(where: {currency_neq: "RUR"}) {
+      id
+      amount
+      currency
+    }
+  }
+}
