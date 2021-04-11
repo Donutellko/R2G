@@ -1,28 +1,53 @@
 package ga.patrick.r2g.util
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.ValueNode
+import com.jayway.jsonpath.DocumentContext
+import com.jayway.jsonpath.JsonPath
+import org.apache.commons.lang3.StringUtils
 
 object VariableUtils {
-    private const val variableMatcher = """(\$\{.+?})"""
+    private const val variablePrefix = "#{"
+    private const val variableSuffix = "}"
+    val variableMatcher = Regex("${variablePrefix.replace("{", "\\{")}(.+?)$variableSuffix")
 
-    fun String.toMatcher() = Regex(replace(Regex(variableMatcher), ".+"))
+    fun String.toMatcher() = Regex(replace(variableMatcher, "(.+)"))
 
-    fun JsonNode.flattenTree(path: String = ""): Set<Pair<String, String>> {
-        return when (this) {
-            is ValueNode -> setOf(path to textValue())
+    fun String.fillTemplate(variables: Map<String, String?>): String {
+        val searchList = variables.keys.map { "$variablePrefix$it$variableSuffix" }.toTypedArray()
+        val replacementList = variables.values.toTypedArray()
+        return StringUtils.replaceEach(this, searchList, replacementList)
+    }
 
-            is ArrayNode -> elements().asSequence()
-                    .flatMapIndexed { i: Int, value: JsonNode -> value.flattenTree("$path[$i]") }
-                    .toSet()
+    fun String.getPaths(): Set<String> = variableMatcher.findAll(this)
+            .map { it.groupValues.last() }
+            .toSet()
 
-            is ObjectNode -> fields().asSequence()
-                    .flatMap { (name, value) -> value.flattenTree("$path.$name") }
-                    .toSet()
+    fun String.getPathVariables(pattern: String): Map<String, String> {
+        val namesMatched = variableMatcher.findAll(pattern).toList()
+        if (namesMatched.isEmpty()) {
+            return emptyMap()
+        }
 
-            else -> throw Exception(this.nodeType.toString())
+        val valuesMatched = pattern.toMatcher().findAll(this).toList()
+
+        val names = namesMatched.map { it.groupValues.last() }
+        val values = valuesMatched.single().groupValues
+                .let { it.subList(1, it.size) }
+
+        return names.zip(values).toMap()
+    }
+
+    fun String.getJsonPaths(paths: Set<String>): Map<String, String?> {
+        val jsonContext: DocumentContext = JsonPath.parse(this)
+        return paths.map { path ->
+            path to jsonContext.readStringOrNull(path)
+        }.toMap()
+    }
+
+    private fun DocumentContext.readStringOrNull(path: String): String? {
+        return try {
+            read<Any>(path).toString()
+        } catch (ex: Exception) {
+            null
         }
     }
 }

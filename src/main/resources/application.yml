@@ -15,10 +15,10 @@ r2g:
       endpoint: fake-ql-accounts
       template: |
         {
-          users(ids: "${userId}") {
+          users(ids: "#{userId}") {
             id
             name
-            accounts(where: { currency_eq: "${currency}" }) {
+            accounts(where: { currency_eq: "#{currency}" }) {
               id
               amount
               currency

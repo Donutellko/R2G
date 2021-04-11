@@ -1,42 +1,27 @@
 package ga.patrick.r2g.service
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.ValueNode
 import ga.patrick.r2g.property.Mapping
-import ga.patrick.r2g.util.VariableUtils.flattenTree
+import ga.patrick.r2g.util.VariableUtils.fillTemplate
+import ga.patrick.r2g.util.VariableUtils.getJsonPaths
+import ga.patrick.r2g.util.VariableUtils.getPathVariables
 import org.springframework.stereotype.Service
 import javax.servlet.http.HttpServletRequest
 
 @Service
-class TemplateFillerService(
-        val objectMapper: ObjectMapper
-) {
+class TemplateFillerService {
 
     fun fillTemplate(mapping: Mapping, request: HttpServletRequest): String {
         val queryParams = request.parameterMap
                 .mapValues { (_, value) -> value.toString() }
 
-        val bodyParams = getJsonParms(request.reader.readText())
+        val uriParams = request.requestURI.getPathVariables(mapping.path)
 
-        val variables = queryParams + bodyParams
+        val requestBody = request.reader.readText()
+        val bodyParams = requestBody.getJsonPaths(mapping.paths)
 
-        return mapping.template.fill(variables)
+        val variables: Map<String, String?> = uriParams + queryParams + bodyParams
+
+        return mapping.template.fillTemplate(variables)
     }
 
-    public fun getJsonParms(text: String): Map<String, String> {
-        try {
-            val tree: JsonNode = objectMapper.readTree(text)
-            return tree.flattenTree().toMap()
-        } catch (ex: Exception) {
-            return emptyMap()
-        }
-    }
-
-
-    private fun String.fill(variables: Map<String, String>): String {
-        TODO("Not yet implemented")
-    }
 }

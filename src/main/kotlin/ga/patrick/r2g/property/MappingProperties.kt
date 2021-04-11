@@ -1,5 +1,6 @@
 package ga.patrick.r2g.property
 
+import ga.patrick.r2g.util.VariableUtils.getPaths
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -22,5 +23,6 @@ data class Mapping(
         val method: String,
         val endpoint: String,
         val template: String,
-        val pathRegex: Regex = path.toMatcher()
+        val pathRegex: Regex = path.toMatcher(),
+        val paths: Set<String> = template.getPaths()
 )

@@ -12,7 +12,7 @@ class ApiController(
 ) {
 
     @RequestMapping("/**")
-    fun endpoint(request: HttpServletRequest): ResponseEntity<Any> {
+    fun endpoint(request: HttpServletRequest): ResponseEntity<String> {
         return requestProcessService.processRequest(request)
     }
 }

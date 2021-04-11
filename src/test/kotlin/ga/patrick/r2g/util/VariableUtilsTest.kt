@@ -1,9 +1,8 @@
 package ga.patrick.r2g.util
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.jayway.jsonpath.DocumentContext
-import com.jayway.jsonpath.JsonPath
-import ga.patrick.r2g.util.VariableUtils.flattenTree
+import ga.patrick.r2g.util.VariableUtils.fillTemplate
+import ga.patrick.r2g.util.VariableUtils.getPathVariables
+import ga.patrick.r2g.util.VariableUtils.getPaths
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -13,13 +12,11 @@ import org.junit.jupiter.api.TestFactory
 
 class VariableUtilsTest {
 
-    val objectMapper = ObjectMapper()
-
     @TestFactory
-    fun testToMatcher() = listOf(
+    fun toMatcherTest() = listOf(
             "/abc" to "/abc",
-            "/abc/\${abc}" to "/abc/.+",
-            "/abc/\${abc}/\${asdasd}" to "/abc/.+/.+"
+            "/abc/#{abc}" to "/abc/(.+)",
+            "/abc/#{abc}/#{asdasd}" to "/abc/(.+)/(.+)"
 
     ).map { (source, expected) ->
         dynamicTest("$source -> $expected") {
@@ -29,24 +26,47 @@ class VariableUtilsTest {
     }
 
     @Test
-    fun a() {
-        val jsonContext: DocumentContext = JsonPath.parse("""{"a": {"c": ["d"] } }""")
-        println(jsonContext)
+    fun fillTemplateTest() {
+        val source = template
+        val variables = mapOf("userId" to "123", "currency" to "RUR")
+        val expected = """
+        {
+          users(ids: "123") {
+            accounts(where: { currency_eq: "RUR" }) {
+            }
+          }
+        }
+        """
+        val actual = source.fillTemplate(variables)
+        Assertions.assertEquals(expected, actual)
     }
 
-    @TestFactory
-    fun testFlattenNode() = listOf(
-            """["a", "b"]""" to setOf("[0]" to "a", "[1]" to "b"),
-            """{ "a": "b" }""" to setOf("a" to "b"),
-            """{ "a": "b", "c": "d" } """ to setOf("a" to "b", "c" to "d"),
-            """{ "a": { "c": "d" } }""" to setOf("a.c" to "d"),
-            """{ "a": { "c": [ "d" ] } }""" to setOf("a.c[0]" to "d"),
-    ).map { (source, expected) ->
-        dynamicTest(source) {
-            val tree = objectMapper.readTree(source)
-            val actual = tree.flattenTree()
+    @Test
+    fun getPathsTest() {
+        val source = template
+        val expected = setOf("userId", "currency")
+        val actual = source.getPaths()
+        Assertions.assertEquals(expected, actual)
+    }
 
-            assertThat(actual).isEqualTo(expected)
+    @Test
+    fun getPathVariablesTest() {
+        val source = "/abc/123/geh/RUR"
+        val pattern = "/abc/#{userId}/geh/#{currency}"
+        val expected = mapOf("userId" to "123", "currency" to "RUR")
+        val actual = source.getPathVariables(pattern)
+        assertThat(actual).isEqualTo(expected)
+    }
+
+
+    companion object {
+        val template = """
+        {
+          users(ids: "#{userId}") {
+            accounts(where: { currency_eq: "#{currency}" }) {
+            }
+          }
         }
+        """
     }
 }
