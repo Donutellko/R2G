@@ -1,6 +1,7 @@
 package ga.patrick.r2g
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.post
@@ -16,7 +17,7 @@ import org.springframework.web.context.WebApplicationContext
         webEnvironment = WebEnvironment.RANDOM_PORT)
 abstract class BaseWebIntergationTest {
 
-    var wiremock: WireMockServer = WireMockServer()
+//    var wiremock: WireMockServer = WireMockServer()
 
     lateinit var mockMvc: MockMvc
 
@@ -45,11 +46,11 @@ abstract class BaseWebIntergationTest {
                  response: String,
                  verifyBody: Boolean = true) {
 
-        wiremock.stubFor(post(uri)
+        WireMock.stubFor(post(uri)
                 .apply {
                     if (verifyBody) withRequestBody(equalTo(request))
                 }
                 .willReturn(aResponse()
-                        .withBodyFile(response)))
+                        .withBody(response)))
     }
 }

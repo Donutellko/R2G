@@ -1,5 +1,5 @@
 r2g:
-  default-endpoint: https://postman-echo.com/
+  default-endpoint: http://localhost:${wiremock.server.port}/
 
   endpoints:
     - name: fake-ql-accounts
@@ -10,7 +10,7 @@ r2g:
       # The fragile API is a throttled endpoint that has random response delays between 0 and 1000 milliseconds and once in a while (1 in 10 chance) is completely unavailable (http error 503). This version of the API is perfect to test edge cases for when your future server is at its limits.
 
   mappings:
-    - path: /users/${userId}/cards?currency=${currency}
+    - path: /users/#{userId}/cards?currency=#{currency}
       method: GET
       endpoint: fake-ql-accounts
       template: |

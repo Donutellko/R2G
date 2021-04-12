@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import ga.patrick.r2g.service.RequestProcessService
+import ga.patrick.r2g.toJson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +40,6 @@ class ApiControllerTest {
 
     companion object {
         val someObject: Any = mapOf("key" to "value")
-        val someOkResponse: ResponseEntity<Any> = ResponseEntity.ok(someObject)
+        val someOkResponse: ResponseEntity<String> = ResponseEntity.ok(someObject.toJson())
     }
 }

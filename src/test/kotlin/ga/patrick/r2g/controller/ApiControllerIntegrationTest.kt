@@ -1,21 +1,21 @@
 package ga.patrick.r2g.controller
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
-import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.whenever
 import ga.patrick.r2g.BaseWebIntergationTest
 import ga.patrick.r2g.service.RequestProcessService
 import ga.patrick.r2g.toJson
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
+@AutoConfigureWireMock(port = 0)
 class ApiControllerIntegrationTest : BaseWebIntergationTest() {
 
     @SpyBean
@@ -47,23 +47,27 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
     fun testDefaultEndpoint() {
         val uri = "/abc/def?ghi=jkl&mno=pqr"
         val body = """{ "abc" : "def" }"""
+        val response = """{ "def" : "ghi" }"""
 
-        stubPost(uri, body, body, verifyBody = false)
+        stubPost(uri, body, response, verifyBody = false)
 
-        mockMvc.post(uri)
+        mockMvc
+                .post(uri) {
+                    content = body
+                    headers { set("headers-name", "header-value") }
+                }
                 .andDo {
                     print()
                     log()
-                }
-                .andExpect {
+                }.andExpect {
                     status { isOk }
                     content {
                         contentType(MediaType.APPLICATION_JSON)
-//                        body.contentEquals("as")
+                        string(response)
                     }
                 }
 
-        wiremock.verify(postRequestedFor(urlEqualTo(uri)).withRequestBody(equalTo(body)))
+        WireMock.verify(postRequestedFor(urlEqualTo(uri)).withRequestBody(equalTo(body)))
     }
 
     companion object {

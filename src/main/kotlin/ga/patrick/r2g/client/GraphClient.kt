@@ -19,5 +19,4 @@ class GraphClient {
                 .toEntity(String::class.java)
                 .block()!!
     }
-
 }
