@@ -12,10 +12,10 @@ r2g:
   mappings:
     - path: /users/#{userId}/cards?currency=#{currency}
       method: GET
-      endpoint: fake-ql-accounts
+      endpoint-name: fake-ql-accounts
       template: |
         {
-          users(ids: #{userId}") {
+          users(ids: "#{userId}") {
             id
             name
             accounts(where: { currency_eq: "#{currency}" }) {

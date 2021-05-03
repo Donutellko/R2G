@@ -4,14 +4,26 @@ import ga.patrick.r2g.util.VariableUtils.getPaths
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import javax.annotation.PostConstruct
 
 @ConfigurationProperties("r2g", ignoreUnknownFields = true)
 @ConstructorBinding
-data class MappingProperties(
+class MappingProperties(
         val defaultEndpoint: String,
-        val endpoints: List<Endpoint>,
-        val mappings: List<Mapping>
-)
+        val mappings: List<Mapping>,
+        endpoints: List<Endpoint>
+) {
+    val endpoints: Map<String, Endpoint> = endpoints.associateBy { it.name }
+
+    @PostConstruct
+    fun validate() {
+        val endpointNames = mappings.map { it.endpointName }
+        val missingEndpoints = endpoints.keys - endpointNames
+        if (missingEndpoints.isNotEmpty()) {
+            throw Exception("Endpoints not found by names: $missingEndpoints.")
+        }
+    }
+}
 
 data class Endpoint(
         val name: String,
@@ -21,7 +33,7 @@ data class Endpoint(
 data class Mapping(
         val path: String,
         val method: String,
-        val endpoint: String,
+        val endpointName: String,
         val template: String,
         val pathRegex: Regex = path.toMatcher(),
         val paths: Set<String> = template.getPaths()
