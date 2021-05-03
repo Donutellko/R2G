@@ -7,9 +7,16 @@ import org.apache.commons.lang3.StringUtils
 object VariableUtils {
     private const val variablePrefix = "#{"
     private const val variableSuffix = "}"
-    val variableMatcher = Regex("${variablePrefix.replace("{", "\\{")}(.+?)$variableSuffix")
+    private const val INTERMEDIATE_REPLACEMENT = "=%INTERMEDIATE%="
 
-    fun String.toMatcher() = Regex(replace(variableMatcher, "(.+)"))
+    private val charactersToEscape = "/?.*{+#^".toCharArray()
+
+    val variableMatcher = Regex("${variablePrefix.escape()}(.+?)$variableSuffix")
+
+    fun String.toMatcher() = Regex(this
+            .replace(variableMatcher, INTERMEDIATE_REPLACEMENT)
+            .escape()
+            .replace(INTERMEDIATE_REPLACEMENT, "(.+)"))
 
     fun String.fillTemplate(variables: Map<String, String?>): String {
         val searchList = variables.keys.map { "$variablePrefix$it$variableSuffix" }.toTypedArray()
@@ -36,11 +43,24 @@ object VariableUtils {
         return names.zip(values).toMap()
     }
 
+    fun Map<String, Array<String?>>.getQueryVariables(): Map<String, String?> =
+            mapValues { (_, value) -> value.joinToString(",") }
+
     fun String.getJsonPaths(paths: Set<String>): Map<String, String?> {
+        if (this.isNullOrBlank()) {
+            return emptyMap()
+        }
+
         val jsonContext: DocumentContext = JsonPath.parse(this)
         return paths.map { path ->
             path to jsonContext.readStringOrNull(path)
         }.toMap()
+    }
+
+    private fun String.escape(): String {
+        var escaped = this
+        charactersToEscape.forEach { escaped = escaped.replace(it.toString(), "\\$it") }
+        return escaped
     }
 
     private fun DocumentContext.readStringOrNull(path: String): String? {

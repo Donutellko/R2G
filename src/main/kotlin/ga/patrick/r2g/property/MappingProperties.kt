@@ -17,8 +17,8 @@ class MappingProperties(
 
     @PostConstruct
     fun validate() {
-        val endpointNames = mappings.map { it.endpointName }
-        val missingEndpoints = endpointNames - endpoints.keys
+        val usedEndpointNames = mappings.map { it.endpointName }
+        val missingEndpoints = usedEndpointNames - endpoints.keys
         if (missingEndpoints.isNotEmpty()) {
             throw Exception("Endpoints not found by names: $missingEndpoints.")
         }

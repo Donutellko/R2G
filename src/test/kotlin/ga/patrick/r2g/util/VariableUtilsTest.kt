@@ -3,6 +3,7 @@ package ga.patrick.r2g.util
 import ga.patrick.r2g.util.VariableUtils.fillTemplate
 import ga.patrick.r2g.util.VariableUtils.getPathVariables
 import ga.patrick.r2g.util.VariableUtils.getPaths
+import ga.patrick.r2g.util.VariableUtils.getQueryVariables
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -14,14 +15,28 @@ class VariableUtilsTest {
 
     @TestFactory
     fun toMatcherTest() = listOf(
-            "/abc" to "/abc",
-            "/abc/#{abc}" to "/abc/(.+)",
-            "/abc/#{abc}/#{asdasd}" to "/abc/(.+)/(.+)"
+            ToMatcherTestSource(
+                    source = "/abc",
+                    expected = """\/abc""",
+                    test = "/abc"),
+            ToMatcherTestSource(
+                    source = "/abc/#{abc}/#{def}",
+                    expected = """\/abc\/(.+)\/(.+)""",
+                    test = "/abc/123/456"),
+            ToMatcherTestSource(
+                    source = "/abc/#{abc}?def=#{def}",
+                    expected = """\/abc\/(.+)\?def=(.+)""",
+                    test = "/abc/123?def=456"),
+            ToMatcherTestSource(
+                    source = "/abc.html",
+                    expected = """\/abc\.html""",
+                    test = "/abc.html")
 
-    ).map { (source, expected) ->
+    ).map { (source, expected, test) ->
         dynamicTest("$source -> $expected") {
             val actual = source.toMatcher()
             Assertions.assertEquals(expected, actual.pattern)
+            Assertions.assertTrue(actual.matches(test))
         }
     }
 
@@ -53,11 +68,39 @@ class VariableUtilsTest {
     fun getPathVariablesTest() {
         val source = "/abc/123/geh/RUR"
         val pattern = "/abc/#{userId}/geh/#{currency}"
-        val expected = mapOf("userId" to "123", "currency" to "RUR")
+        val expected = mapOf(
+                "userId" to "123",
+                "currency" to "RUR"
+        )
         val actual = source.getPathVariables(pattern)
         assertThat(actual).isEqualTo(expected)
     }
 
+    @Test
+    fun getQueryParametersTest() {
+        val source: Map<String, Array<String?>> = mapOf(
+                "currency" to arrayOf("RUR"),
+                "abc" to arrayOf("1", "2"),
+                "def" to arrayOf(null)
+
+        )
+        val expected = mapOf(
+                "currency" to "RUR",
+                "abc" to "1,2",
+                "def" to "null"
+        )
+
+        val actual = source.getQueryVariables()
+
+        assertThat(expected).isEqualTo(actual)
+    }
+
+
+    data class ToMatcherTestSource(
+            val source: String,
+            val expected: String,
+            val test: String
+    )
 
     companion object {
         val template = """

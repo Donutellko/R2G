@@ -1,9 +1,19 @@
+logging:
+  level:
+    root: INFO
+    ga.patrick.r2g: DEBUG
+
 r2g:
   default-endpoint: https://postman-echo.com/
 
   endpoints:
+    - name: fake-ql-posts
+      uri: https://fakeql.com/graphql/8b92022ea3f550516eafe4cbb6cdce46
+      # Default JSON schema for Fake QL
+
     - name: fake-ql-accounts
       uri: https://fakeql.com/graphql/cbc8a521a34c299f030c7f6df523591f
+      # My custom accounts schema
 
     - name: fake-ql-accounts-fragile
       uri: https://fakeql.com/fragilegraphql/cbc8a521a34c299f030c7f6df523591f
@@ -15,7 +25,7 @@ r2g:
       endpoint-name: fake-ql-accounts
       template: |
         {
-          users(ids: "#{userId}") {
+          user (id: "#{userId}") {
             id
             name
             accounts(where: { currency_eq: "#{currency}" }) {
@@ -25,4 +35,17 @@ r2g:
             }
           }
         }
-
+    - path: /posts/#{postId}
+      method: GET
+      endpoint-name: fake-ql-posts
+      template: |
+        {
+            page (id: #{postId}) {
+                id
+                lang
+                title
+                entityUrl: _nest {
+                    path: slug
+                }
+            }
+        }

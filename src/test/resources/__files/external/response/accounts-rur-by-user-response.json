@@ -1,0 +1,15 @@
+{
+  "data": {
+    "user": {
+      "id": "1",
+      "name": "Mike",
+      "accounts": [
+        {
+          "id": "1",
+          "amount": 1500000,
+          "currency": "RUR"
+        }
+      ]
+    }
+  }
+}
