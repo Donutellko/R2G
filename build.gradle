@@ -67,3 +67,37 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+test.finalizedBy jacocoTestReport
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
+
+jacocoTestCoverageVerification {
+    executionData tasks.withType(Test)
+    violationRules {
+        failOnViolation = true
+        rule {
+            element = 'CLASS'
+            excludes = [
+                    "**Application**",
+                    "**Properties**",
+                    "**DTO**"
+                    ]
+            limit {
+                counter = 'INSTRUCTION'
+                minimum = 0.7
+            }
+            limit {
+                counter = 'METHOD'
+                minimum = 0.8
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+jacoco {
+    reportsDir = file("$buildDir/jacoco")
+}

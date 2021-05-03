@@ -25,7 +25,6 @@ class RequestProcessService(
         } else {
             val requestText = templateFillerService.fillTemplate(mapping, request)
             val uri = mappingProperties.endpoints.getValue(mapping.endpointName).uri
-            logger.debug { "request for $uri: \n $requestText" }
             graphClient.send(uri, requestText)
         }
     }
