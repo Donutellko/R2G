@@ -19,6 +19,7 @@ buildscript {
 
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'jacoco'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -61,4 +62,8 @@ dependencies {
     testImplementation "com.marcinziolo:kotlin-wiremock:1.0.0"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock:2.2.4.RELEASE'
+}
+
+test {
+    useJUnitPlatform()
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.matching.MatchResult
 import com.github.tomakehurst.wiremock.matching.MemoizingStringValuePattern
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.text.similarity.LevenshteinDistance
 import kotlin.math.max
 
 class GraphRequestMatcher(
@@ -29,7 +30,7 @@ class GraphRequestMatcher(
         }
         val maxDistance = max(one.length, two.length)
 
-        val actualDistance = StringUtils.getLevenshteinDistance(one, two).toDouble()
+        val actualDistance =LevenshteinDistance(0).apply(one, two).toDouble()
         return actualDistance / maxDistance
     }
 
