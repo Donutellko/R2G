@@ -1,6 +1,5 @@
 package ga.patrick.r2g
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
@@ -17,8 +16,6 @@ import org.springframework.web.context.WebApplicationContext
         webEnvironment = WebEnvironment.RANDOM_PORT)
 abstract class BaseWebIntergationTest {
 
-//    var wiremock: WireMockServer = WireMockServer()
-
     lateinit var mockMvc: MockMvc
 
     @BeforeEach
@@ -28,17 +25,24 @@ abstract class BaseWebIntergationTest {
                 .build()
     }
 
+    fun getFilenames(requestName: String,
+                     responseName: String = requestName,
+                     type: String = "external") =
+            "/__files/$type/request/$requestName-request.json" to
+                    "/__files/$type/response/$responseName-response.json"
+
     fun stubGraph(uri: String,
-                  requestFilename: String,
-                  responseFilename: String = requestFilename) {
+                  requestName: String,
+                  responseName: String = requestName) {
 
-        val requestFile = "/__files/external/request/$requestFilename-request.txt"
-        val responseFile = "/__files/external/response/$responseFilename-response.json"
+        val (requestFile, responseFile) = getFilenames(requestName, responseName)
 
-        val request = fromClasspath(requestFile)
         val response = fromClasspath(responseFile)
 
-        stubPost(uri, request, response)
+        WireMock.stubFor(post(uri)
+                .withRequestBody(GraphRequestMatcher(fromClasspath(requestFile)))
+                .willReturn(aResponse()
+                        .withBody(response)))
     }
 
     fun stubPost(uri: String,

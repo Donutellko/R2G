@@ -1,17 +1,17 @@
 package ga.patrick.r2g.controller
 
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.verify
 import ga.patrick.r2g.BaseWebIntergationTest
+import ga.patrick.r2g.GraphRequestMatcher
+import ga.patrick.r2g.StringLoader.fromClasspath
 import ga.patrick.r2g.service.RequestProcessService
-import ga.patrick.r2g.toJson
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
@@ -26,8 +26,11 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
         val userId = "1"
         val currency = "RUR"
         val uri = "/users/${userId}/cards?currency=${currency}"
+        val fileName = "accounts-rur-by-user"
 
-        stubGraph(fakeQlAccountsEndpoint, "accounts-rur-by-user")
+        val (requestFile, responseFile) = getFilenames(fileName)
+
+        stubGraph(graphqlEndpoint, fileName)
 
         mockMvc.get(uri)
                 .andDo {
@@ -38,9 +41,12 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
                     status { isOk }
                     content {
                         contentType(MediaType.APPLICATION_JSON)
-                        json(ApiControllerTest.someObject.toJson())
+                        json(fromClasspath(responseFile))
                     }
                 }
+
+        verify(postRequestedFor(urlEqualTo(graphqlEndpoint))
+                .withRequestBody(GraphRequestMatcher(fromClasspath(requestFile))))
     }
 
     @Test
@@ -49,7 +55,7 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
         val body = """{ "abc" : "def" }"""
         val response = """{ "def" : "ghi" }"""
 
-        stubPost(uri, body, response, verifyBody = false)
+        stubPost(defaultEndpoint + uri, body, response, verifyBody = false)
 
         mockMvc
                 .post(uri) {
@@ -67,15 +73,13 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
                     }
                 }
 
-        WireMock.verify(postRequestedFor(urlEqualTo(uri)).withRequestBody(equalTo(body)))
+        verify(postRequestedFor(urlEqualTo(defaultEndpoint + uri))
+                .withRequestBody(equalTo(body)))
     }
 
     companion object {
-        val someObject: Any = mapOf("key" to "value")
-        val someOkResponse: ResponseEntity<Any> = ResponseEntity.ok(someObject)
-
-        val defaultEndpoint = "https://postman-echo.com/path/"
-        val fakeQlAccountsEndpoint = "https://fakeql.com/graphql/cbc8a521a34c299f030c7f6df523591f"
+        const val defaultEndpoint = "/default"
+        const val graphqlEndpoint = "/graphql"
     }
 
 }
