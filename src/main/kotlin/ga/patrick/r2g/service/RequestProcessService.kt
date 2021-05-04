@@ -2,7 +2,6 @@ package ga.patrick.r2g.service
 
 import ga.patrick.r2g.client.GraphClient
 import ga.patrick.r2g.property.MappingProperties
-import ga.patrick.r2g.util.fullUri
 import mu.KLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -18,14 +17,14 @@ class RequestProcessService(
 ) {
 
     fun processRequest(request: HttpServletRequest): ResponseEntity<String> {
-        val mapping = mappingMatcherService.findMapping(request.fullUri, request.method)
+        val mapping = mappingMatcherService.findMapping(request)
 
         return if (mapping == null) {
             forwarderService.send(request)
         } else {
-            val requestText = templateFillerService.fillTemplate(mapping, request)
+            val graphRequest = templateFillerService.fillTemplate(mapping, request)
             val uri = mappingProperties.endpoints.getValue(mapping.endpointName).uri
-            graphClient.send(uri, requestText)
+            graphClient.send(uri, graphRequest)
         }
     }
 

@@ -5,7 +5,8 @@ object StringLoader {
         val root = StringLoader::class.java
 
         val resource = root.getResource(path)
+                ?: throw Exception("Resource not found for path: $path")
 
-        return resource!!.readText()
+        return resource.readText()
     }
 }

@@ -36,5 +36,16 @@ data class Mapping(
         val endpointName: String,
         val template: String,
         val pathRegex: Regex = path.toMatcher(),
-        val paths: Set<String> = template.getPaths()
+        val paths: Set<String> = template.getPaths(),
+        val variables: List<VariableDefinition> = listOf()
 )
+
+data class VariableDefinition(
+        val name: String,
+        val source: String,
+        val type: GraphVariableType
+)
+
+enum class GraphVariableType {
+    INT, STRING, DECIMAL
+}

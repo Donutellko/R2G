@@ -8,12 +8,11 @@ import org.springframework.web.reactive.function.client.WebClient
 @Component
 class GraphClient {
 
-    fun send(uri: String, query: String): ResponseEntity<String> {
+    fun send(uri: String, request: GraphDAO): ResponseEntity<String> {
+
         val client = WebClient.builder()
                 .baseUrl(uri)
                 .build()
-
-        val request = GraphDAO(query = query)
 
         return client.post()
                 .bodyValue(request)

@@ -2,6 +2,7 @@ package ga.patrick.r2g.util
 
 import com.jayway.jsonpath.DocumentContext
 import com.jayway.jsonpath.JsonPath
+import ga.patrick.r2g.property.GraphVariableType
 import org.apache.commons.lang3.StringUtils
 
 object VariableUtils {
@@ -52,10 +53,18 @@ object VariableUtils {
         }
 
         val jsonContext: DocumentContext = JsonPath.parse(this)
-        return paths.map { path ->
-            path to jsonContext.readStringOrNull(path)
+        return paths.mapNotNull { path ->
+            jsonContext.readStringOrNull(path)
+                    ?.let { path to it }
         }.toMap()
     }
+
+    fun String.formatAs(type: GraphVariableType) = when(type){
+        GraphVariableType.INT -> this.toInt()
+        GraphVariableType.STRING -> this
+        GraphVariableType.DECIMAL -> this.toDouble()
+    }
+
 
     private fun String.escape(): String {
         var escaped = this

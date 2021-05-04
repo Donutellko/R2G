@@ -22,7 +22,7 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
     lateinit var service: RequestProcessService
 
     @Test
-    fun testGet() {
+    fun `simple get`() {
         val userId = "1"
         val currency = "RUR"
         val uri = "/users/${userId}/cards?currency=${currency}"
@@ -42,6 +42,37 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
                     content {
                         contentType(MediaType.APPLICATION_JSON)
                         json(fromClasspath(responseFile))
+                    }
+                }
+
+        verify(postRequestedFor(urlEqualTo(graphqlEndpoint))
+                .withRequestBody(GraphRequestMatcher(fromClasspath(requestFile))))
+    }
+
+    @Test
+    fun `post with variables`() {
+        val userId = "1"
+        val uri = "/users/${userId}"
+        val fileName = "accounts-update-user-age"
+
+        val (requestFile, responseFile) = getFilenames(fileName)
+        val (selfRequestFile, selfResponseFile) = getFilenames(fileName, type = "self")
+
+        stubGraph(graphqlEndpoint, fileName)
+
+        mockMvc
+                .post(uri) {
+                    this.content = fromClasspath(selfRequestFile)
+                }
+                .andDo {
+                    print()
+                    log()
+                }
+                .andExpect {
+                    status { isOk }
+                    content {
+                        contentType(MediaType.APPLICATION_JSON)
+                        json(fromClasspath(selfResponseFile))
                     }
                 }
 

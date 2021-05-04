@@ -3,26 +3,24 @@ package ga.patrick.r2g
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.tomakehurst.wiremock.matching.MatchResult
 import com.github.tomakehurst.wiremock.matching.MemoizingStringValuePattern
-import org.apache.commons.lang3.StringUtils
 import org.apache.commons.text.similarity.LevenshteinDistance
 import kotlin.math.max
 
 class GraphRequestMatcher(
         @JsonProperty("expectedValue")
-        expectedValue: String
-) : MemoizingStringValuePattern(expectedValue) {
+        expected: String
+) : MemoizingStringValuePattern(expected) {
 
-    override fun calculateMatch(request: String?): MatchResult {
-        val actual = request?.removeWhitespaces()
+    override fun calculateMatch(actual: String?): MatchResult {
+        val actualPrepared = actual?.removeWhitespaces()
+        val expectedPrepared = expected?.removeWhitespaces()
 
-        return if (expected == actual) {
+        return if (expectedPrepared == actualPrepared) {
             MatchResult.exactMatch()
         } else {
-            MatchResult.partialMatch(normalisedLevenshteinDistance(expected, actual))
+            MatchResult.partialMatch(normalisedLevenshteinDistance(expectedPrepared, actualPrepared))
         }
     }
-
-    override fun getExpected() = expectedValue?.removeWhitespaces()
 
     private fun normalisedLevenshteinDistance(one: String?, two: String?): Double {
         if (one == null || two == null) {

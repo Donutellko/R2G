@@ -1,0 +1,7 @@
+{
+  "query": "mutation updateUser($id: ID!, $age: Int!) {\n    updateUser (id: $id, input: { age: $age }) {\n        id\n        name\n        age\n    }\n}",
+  "variables": {
+    "id": "1",
+    "age": 99
+  }
+}

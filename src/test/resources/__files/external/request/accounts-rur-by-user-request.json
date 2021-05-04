@@ -1,3 +1,4 @@
 {
-  "query": " {\n  user (id: \"1\") {\n    id\n    name\n    accounts(where: { currency_eq: \"RUR\" }) {\n      id\n      amount\n      currency\n    }\n  }\n}"
+  "query": " {\n  user (id: \"1\") {\n    id\n    name\n    accounts(where: { currency_eq: \"RUR\" }) {\n      id\n      amount\n      currency\n    }\n  }\n}",
+  "variables": {}
 }

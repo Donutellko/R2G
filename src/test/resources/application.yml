@@ -6,7 +6,7 @@ r2g:
       uri: http://localhost:${wiremock.server.port}/graphql
 
   mappings:
-    - path: /users/#{userId}/cards?currency=#{currency}
+    - path: /users/#{userId}/cards
       method: GET
       endpoint-name: wiremock-endpoint
       template:  |
@@ -21,4 +21,22 @@ r2g:
             }
           }
         }
+    - path: /users/#{userId}
+      method: POST
+      endpoint-name: wiremock-endpoint
+      template:  |
+        mutation updateUser($id: ID!, $age: Int!) {
+            updateUser (id: $id, input: { age: $age }) {
+                id
+                name
+                age
+            }
+        }
+      variables:
+        - name: id
+          source: userId
+          type: String
+        - name: age
+          source: $.age
+          type: Int
 
