@@ -47,7 +47,7 @@ object VariableUtils {
             mapValues { (_, value) -> value.joinToString(",") }
 
     fun String.getJsonPaths(paths: Set<String>): Map<String, String?> {
-        if (this.isNullOrBlank()) {
+        if (this.isBlank()) {
             return emptyMap()
         }
 

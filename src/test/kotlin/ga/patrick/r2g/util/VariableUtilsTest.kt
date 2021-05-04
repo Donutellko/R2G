@@ -1,6 +1,8 @@
 package ga.patrick.r2g.util
 
+import ga.patrick.r2g.toJson
 import ga.patrick.r2g.util.VariableUtils.fillTemplate
+import ga.patrick.r2g.util.VariableUtils.getJsonPaths
 import ga.patrick.r2g.util.VariableUtils.getPathVariables
 import ga.patrick.r2g.util.VariableUtils.getPaths
 import ga.patrick.r2g.util.VariableUtils.getQueryVariables
@@ -40,6 +42,7 @@ class VariableUtilsTest {
         }
     }
 
+
     @Test
     fun fillTemplateTest() {
         val source = template
@@ -56,6 +59,7 @@ class VariableUtilsTest {
         Assertions.assertEquals(expected, actual)
     }
 
+
     @Test
     fun getPathsTest() {
         val source = template
@@ -63,6 +67,7 @@ class VariableUtilsTest {
         val actual = source.getPaths()
         Assertions.assertEquals(expected, actual)
     }
+
 
     @Test
     fun getPathVariablesTest() {
@@ -75,6 +80,7 @@ class VariableUtilsTest {
         val actual = source.getPathVariables(pattern)
         assertThat(actual).isEqualTo(expected)
     }
+
 
     @Test
     fun getQueryParametersTest() {
@@ -91,6 +97,27 @@ class VariableUtilsTest {
         )
 
         val actual = source.getQueryVariables()
+
+        assertThat(expected).isEqualTo(actual)
+    }
+
+
+    @Test
+    fun getJsonPathsTest() {
+        val source: Map<String, Any?> = mapOf(
+                "currency" to "RUR",
+                "abc" to arrayOf("1", "2"),
+                "def" to mapOf("a" to "b", "c" to "d")
+        )
+        val paths = setOf("$.currency", "currency", "abc[1]", "def.c")
+        val expected = mapOf(
+                "$.currency" to "RUR",
+                "currency" to "RUR",
+                "abc[1]" to "2",
+                "def.c" to "d"
+        )
+
+        val actual = source.toJson().getJsonPaths(paths)
 
         assertThat(expected).isEqualTo(actual)
     }
