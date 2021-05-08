@@ -55,7 +55,7 @@ class ApiControllerIntegrationTest : BaseWebIntergationTest() {
         val uri = "/users/${userId}"
         val fileName = "accounts-update-user-age"
 
-        val (requestFile, responseFile) = getFilenames(fileName)
+        val (requestFile, _) = getFilenames(fileName)
         val (selfRequestFile, selfResponseFile) = getFilenames(fileName, type = "self")
 
         stubGraph(graphqlEndpoint, fileName)

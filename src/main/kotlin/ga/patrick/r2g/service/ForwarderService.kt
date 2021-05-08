@@ -1,6 +1,5 @@
 package ga.patrick.r2g.service
 
-import ga.patrick.r2g.property.MappingProperties
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
@@ -9,11 +8,8 @@ import javax.servlet.http.HttpServletRequest
 
 @Component
 class ForwarderService(
-        mappingProperties: MappingProperties
+        private val forwarderClient: WebClient
 ) {
-    val webclient = WebClient.builder()
-            .baseUrl(mappingProperties.defaultEndpoint)
-            .build()
 
     fun send(requestEntity: HttpServletRequest): ResponseEntity<String> {
         val body = requestEntity.reader.readText()
@@ -22,7 +18,7 @@ class ForwarderService(
 
         val method = HttpMethod.valueOf(requestEntity.method)
 
-        val requestSpec = webclient
+        val requestSpec = forwarderClient
                 .method(method)
                 .uri { uriBuilder ->
                     uriBuilder
@@ -41,5 +37,4 @@ class ForwarderService(
                 .toEntity(String::class.java)
                 .block()!!
     }
-
 }
