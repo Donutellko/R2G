@@ -21,7 +21,7 @@ r2g:
 
   mappings:
     - path: /users/#{userId}/cards
-      method: GET
+      methods: GET
       endpoint-name: fake-ql-accounts
       template: |
         {
@@ -36,7 +36,7 @@ r2g:
           }
         }
     - path: /posts/#{postId}
-      method: GET
+      methods: GET
       endpoint-name: fake-ql-posts
       template: |
         {

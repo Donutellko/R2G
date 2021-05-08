@@ -7,7 +7,7 @@ r2g:
 
   mappings:
     - path: /users/#{userId}/cards
-      method: GET
+      methods: GET
       endpoint-name: wiremock-endpoint
       template:  |
         {
@@ -22,7 +22,7 @@ r2g:
           }
         }
     - path: /users/#{userId}
-      method: POST
+      methods: POST
       endpoint-name: wiremock-endpoint
       template:  |
         mutation updateUser($id: ID!, $age: Int!) {
