@@ -4,6 +4,7 @@ import ga.patrick.r2g.util.VariableUtils.getPaths
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import org.springframework.http.HttpMethod
 import javax.annotation.PostConstruct
 
 @ConfigurationProperties("r2g", ignoreUnknownFields = true)
@@ -17,8 +18,8 @@ class MappingProperties(
 
     @PostConstruct
     fun validate() {
-        val endpointNames = mappings.map { it.endpointName }
-        val missingEndpoints = endpointNames - endpoints.keys
+        val usedEndpointNames = mappings.map { it.endpointName }
+        val missingEndpoints = usedEndpointNames - endpoints.keys
         if (missingEndpoints.isNotEmpty()) {
             throw Exception("Endpoints not found by names: $missingEndpoints.")
         }
@@ -32,9 +33,21 @@ data class Endpoint(
 
 data class Mapping(
         val path: String,
-        val method: String,
+        val methods: List<HttpMethod>,
         val endpointName: String,
         val template: String,
-        val pathRegex: Regex = path.toMatcher(),
-        val paths: Set<String> = template.getPaths()
+        val variables: List<VariableDefinition> = listOf()
+) {
+    val paths: Set<String> = template.getPaths()
+    val pathRegex: Regex = path.toMatcher()
+}
+
+data class VariableDefinition(
+        val name: String,
+        val source: String,
+        val type: GraphVariableType
 )
+
+enum class GraphVariableType {
+    INT, STRING, DECIMAL
+}

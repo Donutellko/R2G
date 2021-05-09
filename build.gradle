@@ -18,7 +18,9 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'org.jetbrains.kotlin.jvm' version "$kotlinVersion"
+    id 'org.jetbrains.kotlin.plugin.allopen' version "$kotlinVersion"
+    id 'jacoco'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -52,13 +54,51 @@ dependencies {
 	implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
 	implementation "org.jetbrains.kotlin:kotlin-reflect"
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
     implementation "io.github.microutils:kotlin-logging:1.6.26"
     implementation "com.jayway.jsonpath:json-path:2.4.0"
     implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.apache.commons:commons-text:1.9'
 
-
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "com.marcinziolo:kotlin-wiremock:1.0.0"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock:2.2.4.RELEASE'
+}
+
+test {
+    useJUnitPlatform()
+}
+test.finalizedBy jacocoTestReport
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
+
+jacocoTestCoverageVerification {
+    executionData tasks.withType(Test)
+    violationRules {
+        failOnViolation = true
+        rule {
+            element = 'CLASS'
+            excludes = [
+                    "**Application**",
+                    "**Properties**",
+                    "**DTO**"
+                    ]
+            limit {
+                counter = 'INSTRUCTION'
+                minimum = 0.7
+            }
+            limit {
+                counter = 'METHOD'
+                minimum = 0.8
+            }
+            limit {
+                counter = 'BRANCH'
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+jacoco {
+    reportsDir = file("$buildDir/jacoco")
 }
