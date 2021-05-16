@@ -8,7 +8,7 @@ r2g:
 
   endpoints:
     - name: fake-ql-posts
-      uri: https://fakeql.com/graphql/8b92022ea3f550516eafe4cbb6cdce46
+      uri: https://fakeql.com/graphql/2ac7b64a14b9d30a93e98fb1aa431b0f
       # Default JSON schema for Fake QL
 
     - name: fake-ql-accounts
@@ -16,7 +16,7 @@ r2g:
       # My custom accounts schema
 
     - name: fake-ql-accounts-fragile
-      uri: https://fakeql.com/fragilegraphql/cbc8a521a34c299f030c7f6df523591f
+      uri: https://fakeql.com/fragilegraphql/2ac7b64a14b9d30a93e98fb1aa431b0f
       # The fragile API is a throttled endpoint that has random response delays between 0 and 1000 milliseconds and once in a while (1 in 10 chance) is completely unavailable (http error 503). This version of the API is perfect to test edge cases for when your future server is at its limits.
 
   mappings:

@@ -1,23 +1,8 @@
 package ga.patrick.r2g.client
 
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
 
+interface GraphClient {
 
-@Component
-class GraphClient {
-
-    fun send(uri: String, request: GraphDAO): ResponseEntity<String> {
-
-        val client = WebClient.builder()
-                .baseUrl(uri)
-                .build()
-
-        return client.post()
-                .bodyValue(request)
-                .retrieve()
-                .toEntity(String::class.java)
-                .block()!!
-    }
+    fun send(uri: String, request: GraphDAO): ResponseEntity<String>
 }
