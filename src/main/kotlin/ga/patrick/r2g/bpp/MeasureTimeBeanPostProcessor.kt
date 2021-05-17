@@ -24,9 +24,9 @@ class MeasureTimeBeanPostProcessor : BeanPostProcessor {
 
         return Proxy.newProxyInstance(type.classLoader, type.interfaces)
         { proxy, method, args ->
-            val beginTime = System.nanoTime()
+            val beginTime = System.currentTimeMillis()
             val result = method.invoke(bean, *args)
-            val totalTime = System.nanoTime() - beginTime
+            val totalTime = System.currentTimeMillis() - beginTime
 
             measurementsData.compute(type.name) { name, list ->
                 (list ?: mutableListOf())
@@ -35,12 +35,12 @@ class MeasureTimeBeanPostProcessor : BeanPostProcessor {
 
 //            counter++
 //            if (counter % 10 == 0) {
-            measurementsData.forEach { (t, u) ->
-                println(t + ": " + u.joinToString("\t"))
-            }
+//            measurementsData.forEach { (t, u) ->
+//                println(t + ": " + u.joinToString("\t"))
+//            }
 //            }
 
-//            logger.info { "Invocation of ${type.name}.${method.name} took: $totalTime ms. " }
+            logger.info { "Invocation of ${type.name}.${method.name} took: $totalTime ms. " }
             result
         }
     }

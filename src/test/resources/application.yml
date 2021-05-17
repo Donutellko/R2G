@@ -39,4 +39,12 @@ r2g:
         - name: age
           source: $.age
           type: Int
-
+    - path: /users/
+      methods: GET
+      endpoint-name: wiremock-endpoint
+      template:  |
+        user {
+            id
+            name
+            age
+        }

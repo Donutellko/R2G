@@ -5,6 +5,7 @@ import ga.patrick.r2g.property.Mapping
 import ga.patrick.r2g.property.MappingProperties
 import ga.patrick.r2g.service.MappingMatcherServiceTest.TestData.Companion.EQUALS_VALIDATOR
 import ga.patrick.r2g.service.MappingMatcherServiceTest.TestData.Companion.NULL_VALIDATOR
+import ga.patrick.r2g.service.impl.MappingMatcherServiceImpl
 import ga.patrick.r2g.util.VariableUtils.toMatcher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DynamicTest
@@ -19,7 +20,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import java.net.URI
 import java.util.function.Consumer
 
-@SpringBootTest(classes = [MappingMatcherService::class])
+@SpringBootTest(classes = [MappingMatcherServiceImpl::class])
 class MappingMatcherServiceTest {
 
     @Autowired
@@ -35,6 +36,15 @@ class MappingMatcherServiceTest {
                     mappings = listOf(exampleMapping),
                     request = exampleRequest,
                     validator = EQUALS_VALIDATOR(exampleMapping)
+            ),
+            TestData(
+                    "find and return most specific mapping, if two match",
+                    mappings = listOf(
+                            exampleMapping.copy(path = "/path"),
+                            exampleMapping.copy(path = "/path/#{id}")
+                    ),
+                    request = exampleRequest.apply{ requestURI = "/path/" },
+                    validator = EQUALS_VALIDATOR(exampleMapping.copy(path = "/path"))
             ),
             TestData(
                     "do not find mapping if method is wrong",
@@ -65,28 +75,28 @@ class MappingMatcherServiceTest {
     /**
      * Feature-request: out of several mappings, select the most accurate
      */
-    @Test
-    fun `throw exception if two mappings match`() {
-        val mappings = listOf(
-                exampleMapping.copy(path = "/path/#{var1}/"),
-                exampleMapping.copy(path = "/path/#{var1}/#{var2}/")
-        )
-        val request = exampleRequest.apply {
-            requestURI = "/path/abc/def/"
-        }
-
-        whenever(mappingProperties.mappings)
-                .thenReturn(mappings)
-
-        val actual = assertThrows<Exception> {
-            mappingMatcherService.findMapping(request)
-        }
-
-        val expectedString = "Matched 2 mappings for GET /path/abc/def/?user=value1&param2=value2, expected 1 or 0. " +
-                "Matched paths: [[GET, /path/#{var1}/], [GET, /path/#{var1}/#{var2}/]]"
-
-        Assertions.assertEquals(expectedString, actual.message)
-    }
+//    @Test
+//    fun `throw exception if two mappings match`() {
+//        val mappings = listOf(
+//                exampleMapping.copy(path = "/path/#{var1}/"),
+//                exampleMapping.copy(path = "/path/#{var1}/#{var2}/")
+//        )
+//        val request = exampleRequest.apply {
+//            requestURI = "/path/abc/def/"
+//        }
+//
+//        whenever(mappingProperties.mappings)
+//                .thenReturn(mappings)
+//
+//        val actual = assertThrows<Exception> {
+//            mappingMatcherService.findMapping(request)
+//        }
+//
+//        val expectedString = "Matched 2 mappings for GET /path/abc/def/?user=value1&param2=value2, expected 1 or 0. " +
+//                "Matched paths: [[GET, /path/#{var1}/], [GET, /path/#{var1}/#{var2}/]]"
+//
+//        Assertions.assertEquals(expectedString, actual.message)
+//    }
 
 
     data class TestData(

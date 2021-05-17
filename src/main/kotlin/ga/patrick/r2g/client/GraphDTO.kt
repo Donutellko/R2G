@@ -1,6 +1,6 @@
 package ga.patrick.r2g.client
 
-data class GraphDAO(
+data class GraphDTO(
         val query: String,
         val variables: Map<String, Any>
 )

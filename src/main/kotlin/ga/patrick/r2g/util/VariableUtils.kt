@@ -15,9 +15,13 @@ object VariableUtils {
     val variableMatcher = Regex("${variablePrefix.escape()}(.+?)$variableSuffix")
 
     fun String.toMatcher() = Regex(this
+            .trim()
+            .trimEnd('/')
             .replace(variableMatcher, INTERMEDIATE_REPLACEMENT)
             .escape()
-            .replace(INTERMEDIATE_REPLACEMENT, "(.+)"))
+            .replace(INTERMEDIATE_REPLACEMENT, "(.+)")
+            + "\\/?")
+
 
     fun String.fillTemplate(variables: Map<String, String?>): String {
         val searchList = variables.keys.map { "$variablePrefix$it$variableSuffix" }.toTypedArray()

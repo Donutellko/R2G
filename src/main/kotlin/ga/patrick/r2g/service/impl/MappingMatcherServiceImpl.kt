@@ -19,12 +19,16 @@ class MappingMatcherServiceImpl (
         val mappings = mappingProperties.mappings
         val matchingMappers = mappings
                 .filter { mapping -> mapping.matches(request) }
+                .sortedBy { it.pathRegex.pattern.length }
 
         return when {
             matchingMappers.isEmpty() -> null
             matchingMappers.size == 1 -> matchingMappers.single()
-            else -> throw Exception("Matched ${matchingMappers.size} mappings for ${request.method} ${request.fullUri}, expected 1 or 0. " +
-                    "Matched paths: ${matchingMappers.map { it.methods + it.path }}")
+            else -> {
+                logger.warn("Matched ${matchingMappers.size} mappings for ${request.method} ${request.fullUri}, expected 1 or 0. " +
+                        "Matched paths: ${matchingMappers.map { it.methods + it.path }}; using most similar.")
+                matchingMappers.first()
+            }
         }
     }
 

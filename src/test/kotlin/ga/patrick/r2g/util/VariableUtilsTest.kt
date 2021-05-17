@@ -19,26 +19,39 @@ class VariableUtilsTest {
     fun toMatcherTest() = listOf(
             ToMatcherTestSource(
                     source = "/abc",
-                    expected = """\/abc""",
+                    expected = """\/abc\/?""",
                     test = "/abc"),
             ToMatcherTestSource(
+                    source = "/abc",
+                    expected = """\/abc\/?""",
+                    test = "/abc/"),
+            ToMatcherTestSource(
+                    source = "/abc/",
+                    expected = """\/abc\/?""",
+                    test = "/abc"),
+            ToMatcherTestSource(
+                    source = "/abc/",
+                    expected = """\/abc\/?""",
+                    test = "/abc/"),
+            ToMatcherTestSource(
                     source = "/abc/#{abc}/#{def}",
-                    expected = """\/abc\/(.+)\/(.+)""",
+                    expected = """\/abc\/(.+)\/(.+)\/?""",
                     test = "/abc/123/456"),
             ToMatcherTestSource(
                     source = "/abc/#{abc}?def=#{def}",
-                    expected = """\/abc\/(.+)\?def=(.+)""",
+                    expected = """\/abc\/(.+)\?def=(.+)\/?""",
                     test = "/abc/123?def=456"),
             ToMatcherTestSource(
                     source = "/abc.html",
-                    expected = """\/abc\.html""",
+                    expected = """\/abc\.html\/?""",
                     test = "/abc.html")
 
     ).map { (source, expected, test) ->
-        dynamicTest("$source -> $expected") {
+        dynamicTest("$source -> $expected (to match $test)") {
             val actual = source.toMatcher()
-            Assertions.assertEquals(expected, actual.pattern)
             Assertions.assertTrue(actual.matches(test))
+            Assertions.assertEquals(expected, actual.pattern,
+                    "Pattern is not equal to expected, however it matches the test string. ")
         }
     }
 
@@ -69,16 +82,26 @@ class VariableUtilsTest {
     }
 
 
-    @Test
-    fun getPathVariablesTest() {
-        val source = "/abc/123/geh/RUR"
-        val pattern = "/abc/#{userId}/geh/#{currency}"
-        val expected = mapOf(
-                "userId" to "123",
-                "currency" to "RUR"
-        )
-        val actual = source.getPathVariables(pattern)
-        assertThat(actual).isEqualTo(expected)
+    @TestFactory
+    fun getPathVariablesTest() = listOf(
+            GetPathVariablesTestSource(
+                    source = "/abc/123/geh/RUR",
+                    pattern = "/abc/#{userId}/geh/#{currency}",
+                    expected = mapOf(
+                            "userId" to "123",
+                            "currency" to "RUR"
+                    )
+            ),
+            GetPathVariablesTestSource(
+                    source = "/abc/",
+                    pattern = "/abc/",
+                    expected = mapOf()
+            )
+    ).map { (source, pattern, expected) ->
+        dynamicTest("$source with pattern $pattern") {
+            val actual = source.getPathVariables(pattern)
+            assertThat(actual).isEqualTo(expected)
+        }
     }
 
 
@@ -127,6 +150,12 @@ class VariableUtilsTest {
             val source: String,
             val expected: String,
             val test: String
+    )
+
+    data class GetPathVariablesTestSource(
+            val source: String,
+            val pattern: String,
+            val expected: Map<String, String>
     )
 
     companion object {

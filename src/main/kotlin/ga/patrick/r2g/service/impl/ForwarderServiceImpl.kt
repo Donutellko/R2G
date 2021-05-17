@@ -1,7 +1,10 @@
 package ga.patrick.r2g.service.impl
 
 import ga.patrick.r2g.bpp.MeasureTime
+import ga.patrick.r2g.configuration.WebclientConfiguration
+import ga.patrick.r2g.configuration.WebclientConfiguration.Companion.FORWARDER_CLIENT
 import ga.patrick.r2g.service.ForwarderService
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpServletRequest
 @MeasureTime
 @Component
 class ForwarderServiceImpl(
+        @Qualifier(FORWARDER_CLIENT)
         private val forwarderClient: WebClient
 ) : ForwarderService {
 

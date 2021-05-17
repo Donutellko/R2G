@@ -1,6 +1,6 @@
 package ga.patrick.r2g.service.impl
 
-import ga.patrick.r2g.client.GraphDAO
+import ga.patrick.r2g.client.GraphDTO
 import ga.patrick.r2g.property.Mapping
 import ga.patrick.r2g.service.TemplateFillerService
 import ga.patrick.r2g.util.VariableUtils.fillTemplate
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 @Service
 class TemplateFillerServiceImpl : TemplateFillerService {
 
-    override fun fillTemplate(mapping: Mapping, request: HttpServletRequest): GraphDAO {
+    override fun fillTemplate(mapping: Mapping, request: HttpServletRequest): GraphDTO {
         val fillingVariables = getVariables(mapping, request)
 
         val requestVariables = mapping.variables
@@ -23,7 +23,7 @@ class TemplateFillerServiceImpl : TemplateFillerService {
                             ?.let{ definition.name to it }
                 }.toMap()
 
-        return GraphDAO(
+        return GraphDTO(
                 query = mapping.template.fillTemplate(fillingVariables),
                 variables = requestVariables
         )

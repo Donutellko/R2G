@@ -1,7 +1,7 @@
 package ga.patrick.r2g.service.impl
 
 import ga.patrick.r2g.bpp.MeasureTime
-import ga.patrick.r2g.client.GraphClient
+import ga.patrick.r2g.service.GraphService
 import ga.patrick.r2g.property.MappingProperties
 import ga.patrick.r2g.service.ForwarderService
 import ga.patrick.r2g.service.MappingMatcherService
@@ -17,7 +17,7 @@ class RequestProcessServiceImpl(
         private val mappingMatcherService: MappingMatcherService,
         private val templateFillerService: TemplateFillerServiceImpl,
         private val forwarderService: ForwarderService,
-        private val graphClient: GraphClient,
+        private val graphService: GraphService,
         private val mappingProperties: MappingProperties
 ) : RequestProcessService {
 
@@ -29,7 +29,7 @@ class RequestProcessServiceImpl(
         } else {
             val graphRequest = templateFillerService.fillTemplate(mapping, request)
             val uri = mappingProperties.endpoints.getValue(mapping.endpointName).uri
-            graphClient.send(uri, graphRequest)
+            graphService.send(uri, graphRequest)
         }
     }
 

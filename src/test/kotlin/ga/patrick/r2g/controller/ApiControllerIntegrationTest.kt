@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.post
 class ApiControllerIntegrationTest : BaseWebIntergationTest() {
 
     @SpyBean
-    lateinit var service: RequestProcessService
+    lateinit var requestProcessService: RequestProcessService
 
     @Test
     fun `simple get`() {
